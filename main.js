@@ -1,3 +1,5 @@
+const { default: axios } = require("axios")
+
 console.log('connected')
 
 const getAllBtn = document.querySelector('#all')
@@ -12,10 +14,10 @@ const newAgeInput = document.querySelector('#age')
 const newLikesText = document.querySelector('textarea')
 const charContainer = document.querySelector('section')
 
-// const baseURL = 
+const baseURL = 'http://localhost:4000'
 
 getAllBtn.addEventListener('click', () => {
-  axios.get('http://localhost:4000/characters')
+  axios.get(`${baseURL}/characters`)
   .then ((response) => {
     clearCharacters()
     for(let i = 0; response.data.length; i++){
@@ -26,6 +28,64 @@ getAllBtn.addEventListener('click', () => {
 
   })
 })
+
+ageForm.addEventListener('submit', (event) =>{
+  event.preventDefault()
+
+  let age = ageInput.value
+
+  axios.get(`${baseURL}/character?age=${age}`)
+  .then(response =>{
+    clearCharacters()
+    for(let i = 0; response.data.length; i++){
+      createCharacterCard(response.data[i])
+    }
+  })
+  .catch(() => {
+
+  })
+})
+
+createForm.addEventListener('submit', event =>{
+  event.preventDefault()
+  let maBod = {
+        firstName: newFirstInput.value, 
+        lastName: newLastInput.value,
+        age: newAgeInput.value,
+        gender: newGenderDropDown.value, 
+        likes: newLikesText.value.split(',')
+  }
+
+  axios.post(`${baseURL}/character`, maBod)
+  .then((response) => {
+    clearCharacters()
+    for(let i = 0; response.data.length; i++){
+      createCharacterCard(response.data[i])
+    }
+    newFirstInput.value = ''
+    newLastInput.value = ''
+    newGenderDropDown.value = ''
+    newAgeInput.value = ''
+    newLikesText.value = ''
+  })
+  .catch(() => {
+
+  })
+})
+
+for(let i = 0; charBtns.length; i++){
+  charBtns[i].addEventListener('click', (event) => {
+    let name = event.target.id
+    axios.get(`${baseURL}/character/${name}`)
+    .then(response =>{
+      clearCharacters()
+      createCharacterCard(response.data[i])
+    })
+    .catch(() => {
+  
+    })
+  })
+}
 
 function createCharacterCard(char) {
   let charCard = document.createElement('div')
